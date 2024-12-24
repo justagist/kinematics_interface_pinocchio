@@ -1,10 +1,10 @@
 # kinematics_interface_pinocchio
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![ROS Version](https://img.shields.io/badge/ROS-Humble-brightgreen.svg?logo=ros)](https://docs.ros.org/en/humble/index.html)
+[![ROS Version](https://img.shields.io/badge/ROS-Rolling-yellow.svg?logo=ros)](https://docs.ros.org/en/humble/index.html)
 
 A [Pinocchio](https://github.com/stack-of-tasks/pinocchio)-based [ROS2 Kinematics Interface](https://github.com/ros-controls/kinematics_interface) implementation. This can be used instead of the default [KDL implementation](https://github.com/ros-controls/kinematics_interface/tree/master/kinematics_interface_kdl) shipped with default ROS installations.
 
-Requires pinocchio to be installed: `apt install ros-humble-pinocchio`.
+Requires pinocchio to be installed: `apt install ros-rolling-pinocchio`.
 
 This package can now be installed directly from ros-distro for humble: `apt install ros-humble-kinematics-interface-pinocchio`.
 

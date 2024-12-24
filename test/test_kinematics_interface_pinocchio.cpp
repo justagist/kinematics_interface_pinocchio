@@ -28,6 +28,8 @@ public:
     std::shared_ptr<kinematics_interface::KinematicsInterface> ik_;
     std::shared_ptr<rclcpp_lifecycle::LifecycleNode> node_;
     std::string end_effector_ = "link2";
+    std::string urdf_ =
+        std::string(ros2_control_test_assets::urdf_head) + std::string(ros2_control_test_assets::urdf_tail);
 
     void SetUp()
     {
@@ -71,17 +73,17 @@ TEST_F(TestPinocchioPlugin, Pinocchio_plugin_function)
     loadAlphaParameter();
 
     // initialize the  plugin
-    ASSERT_TRUE(ik_->initialize(node_->get_node_parameters_interface(), end_effector_));
+    ASSERT_TRUE(ik_->initialize(urdf_, node_->get_node_parameters_interface(), ""));
 
     // calculate end effector transform
-    Eigen::Matrix<double, Eigen::Dynamic, 1> pos = Eigen::Matrix<double, 2, 1>::Zero();
+    Eigen::Matrix<double, Eigen::Dynamic, 1> pos = Eigen::Matrix<double, 3, 1>::Zero();
     Eigen::Isometry3d end_effector_transform;
     ASSERT_TRUE(ik_->calculate_link_transform(pos, end_effector_, end_effector_transform));
 
     // convert cartesian delta to joint delta
     Eigen::Matrix<double, 6, 1> delta_x = Eigen::Matrix<double, 6, 1>::Zero();
     delta_x[2] = 1;
-    Eigen::Matrix<double, Eigen::Dynamic, 1> delta_theta = Eigen::Matrix<double, 2, 1>::Zero();
+    Eigen::Matrix<double, Eigen::Dynamic, 1> delta_theta = Eigen::Matrix<double, 3, 1>::Zero();
     ASSERT_TRUE(ik_->convert_cartesian_deltas_to_joint_deltas(pos, delta_x, end_effector_, delta_theta));
 
     // convert joint delta to cartesian delta
@@ -102,17 +104,17 @@ TEST_F(TestPinocchioPlugin, Pinocchio_plugin_function_std_vector)
     loadAlphaParameter();
 
     // initialize the  plugin
-    ASSERT_TRUE(ik_->initialize(node_->get_node_parameters_interface(), end_effector_));
+    ASSERT_TRUE(ik_->initialize(urdf_, node_->get_node_parameters_interface(), ""));
 
     // calculate end effector transform
-    std::vector<double> pos = {0, 0};
+    std::vector<double> pos = {0, 0, 0};
     Eigen::Isometry3d end_effector_transform;
     ASSERT_TRUE(ik_->calculate_link_transform(pos, end_effector_, end_effector_transform));
 
     // convert cartesian delta to joint delta
     std::vector<double> delta_x = {0, 0, 0, 0, 0, 0};
     delta_x[2] = 1;
-    std::vector<double> delta_theta = {0, 0};
+    std::vector<double> delta_theta = {0, 0, 0};
     ASSERT_TRUE(ik_->convert_cartesian_deltas_to_joint_deltas(pos, delta_x, end_effector_, delta_theta));
 
     // convert joint delta to cartesian delta
@@ -133,7 +135,7 @@ TEST_F(TestPinocchioPlugin, incorrect_input_sizes)
     loadAlphaParameter();
 
     // initialize the  plugin
-    ASSERT_TRUE(ik_->initialize(node_->get_node_parameters_interface(), end_effector_));
+    ASSERT_TRUE(ik_->initialize(urdf_, node_->get_node_parameters_interface(), ""));
 
     // define correct values
     Eigen::Matrix<double, Eigen::Dynamic, 1> pos = Eigen::Matrix<double, 2, 1>::Zero();
@@ -165,5 +167,5 @@ TEST_F(TestPinocchioPlugin, Pinocchio_plugin_no_robot_description)
 {
     // load alpha to parameter server
     loadAlphaParameter();
-    ASSERT_FALSE(ik_->initialize(node_->get_node_parameters_interface(), end_effector_));
+    ASSERT_FALSE(ik_->initialize("", node_->get_node_parameters_interface(), ""));
 }
