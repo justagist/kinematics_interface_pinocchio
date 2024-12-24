@@ -21,21 +21,34 @@ namespace kinematics_interface_pinocchio
 rclcpp::Logger LOGGER = rclcpp::get_logger("kinematics_interface_pinocchio");
 
 bool KinematicsInterfacePinocchio::initialize(
+    const std::string& robot_description,
     std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface,
-    const std::string& end_effector_name
+    const std::string& param_namespace
 )
 {
     // track initialization plugin
     initialized = true;
 
-    // get robot description
-    auto robot_param = rclcpp::Parameter();
-    if (!parameters_interface->get_parameter("robot_description", robot_param))
+    // get parameters
+    std::string ns = !param_namespace.empty() ? param_namespace + "." : "";
+
+    std::string robot_description_local;
+    if (robot_description.empty())
     {
-        RCLCPP_ERROR(LOGGER, "parameter robot_description not set");
-        return false;
+        // If the robot_description input argument is empty, try to get the
+        // robot_description from the node's parameters.
+        auto robot_param = rclcpp::Parameter();
+        if (!parameters_interface->get_parameter("robot_description", robot_param))
+        {
+            RCLCPP_ERROR(LOGGER, "parameter robot_description not set in kinematics_interface_pinocchio");
+            return false;
+        }
+        robot_description_local = robot_param.as_string();
     }
-    auto robot_description = robot_param.as_string();
+    else
+    {
+        robot_description_local = robot_description;
+    }
     // get alpha damping term
     auto alpha_param = rclcpp::Parameter("alpha", 0.000005);
     if (parameters_interface->has_parameter("alpha"))
@@ -56,7 +69,7 @@ bool KinematicsInterfacePinocchio::initialize(
         root_name_ = model_.frames[0].name;
     }
     // TODO: only handling fixed base now
-    model_ = pinocchio::urdf::buildModelFromXML(robot_description, /*root_name_,*/ model_, true);
+    model_ = pinocchio::urdf::buildModelFromXML(robot_description_local, /*root_name_,*/ model_, true);
 
     // allocate dynamics memory
     data_ = std::make_shared<pinocchio::Data>(model_);
@@ -150,6 +163,13 @@ bool KinematicsInterfacePinocchio::calculate_link_transform(
     // verify inputs
     if (!verify_initialized() || !verify_joint_vector(joint_pos) || !verify_link_name(link_name))
     {
+        RCLCPP_ERROR(
+            LOGGER, "Verification failed: %s",
+            !verify_initialized()             ? "Not initialized"
+            : !verify_joint_vector(joint_pos) ? "Invalid joint vector"
+            : !verify_link_name(link_name)    ? "Invalid link name"
+                                              : "Unknown error"
+        );
         return false;
     }
 
