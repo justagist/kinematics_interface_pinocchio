@@ -64,6 +64,11 @@ public:
         Eigen::Matrix<double, 6, Eigen::Dynamic>& jacobian
     ) override;
 
+    bool calculate_jacobian_inverse(
+        const Eigen::VectorXd & joint_pos, const std::string & link_name,
+        Eigen::Matrix<double, Eigen::Dynamic, 6> & jacobian_inverse
+    ) override;
+
 private:
     // verification methods
     bool verify_initialized();
