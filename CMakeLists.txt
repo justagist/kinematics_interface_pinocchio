@@ -30,7 +30,10 @@ target_include_directories(kinematics_interface_pinocchio PUBLIC
 )
 target_compile_features(kinematics_interface_pinocchio PUBLIC cxx_std_17)
 target_link_libraries(kinematics_interface_pinocchio PUBLIC
-  Eigen3::Eigen kinematics_interface::kinematics_interface pinocchio::pinocchio pluginlib::pluginlib
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+target_link_libraries(kinematics_interface_pinocchio PUBLIC
+  Eigen3::Eigen pinocchio::pinocchio
 )
 
 pluginlib_export_plugin_description_file(kinematics_interface kinematics_interface_pinocchio.xml)
@@ -43,10 +46,11 @@ if(BUILD_TESTING)
     test_kinematics_interface_pinocchio
     test/test_kinematics_interface_pinocchio.cpp
   )
-  target_link_libraries(test_kinematics_interface_pinocchio kinematics_interface_pinocchio ros2_control_test_assets::ros2_control_test_assets)
+  target_link_libraries(test_kinematics_interface_pinocchio kinematics_interface_pinocchio)
 
   # TODO: Use target_link_libraries once ros2_control_test_assets'
   #       CMake include export is fixed
+  ament_target_dependencies(test_kinematics_interface_pinocchio ros2_control_test_assets)
 endif()
 
 install(
