@@ -29,7 +29,7 @@ target_include_directories(kinematics_interface_pinocchio PUBLIC
   $<INSTALL_INTERFACE:include/kinematics_interface_pinocchio>
 )
 target_compile_features(kinematics_interface_pinocchio PUBLIC cxx_std_17)
-target_link_libraries(kinematics_interface_pinocchio PUBLIC
+ament_target_dependencies(kinematics_interface_pinocchio PUBLIC
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 target_link_libraries(kinematics_interface_pinocchio PUBLIC
