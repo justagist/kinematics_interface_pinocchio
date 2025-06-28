@@ -65,8 +65,8 @@ public:
     ) override;
 
     bool calculate_jacobian_inverse(
-        const Eigen::VectorXd & joint_pos, const std::string & link_name,
-        Eigen::Matrix<double, Eigen::Dynamic, 6> & jacobian_inverse
+        const Eigen::VectorXd& joint_pos, const std::string& link_name,
+        Eigen::Matrix<double, Eigen::Dynamic, 6>& jacobian_inverse
     ) override;
 
 private:
@@ -75,6 +75,7 @@ private:
     bool verify_link_name(const std::string& link_name);
     bool verify_joint_vector(const Eigen::VectorXd& joint_vector);
     bool verify_jacobian(const Eigen::Matrix<double, 6, Eigen::Dynamic>& jacobian);
+    bool verify_jacobian_inverse(const Eigen::Matrix<double, Eigen::Dynamic, 6>& jacobian_inverse);
 
     bool initialized = false;
     std::string root_name_;
@@ -84,6 +85,7 @@ private:
     std::shared_ptr<pinocchio::Data> data_;
     Eigen::VectorXd q_;
     Eigen::MatrixXd jacobian_;
+    Eigen::Matrix<double, Eigen::Dynamic, 6> jacobian_inverse_;
     Eigen::MatrixXd frame_tf_;
 
     std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface_;

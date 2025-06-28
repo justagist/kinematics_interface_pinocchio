@@ -78,6 +78,7 @@ bool KinematicsInterfacePinocchio::initialize(
     I = Eigen::MatrixXd(num_joints_, num_joints_);
     I.setIdentity();
     jacobian_.resize(6, num_joints_);
+    jacobian_inverse_.resize(num_joints_, 6);
 
     return true;
 }
@@ -118,16 +119,13 @@ bool KinematicsInterfacePinocchio::convert_cartesian_deltas_to_joint_deltas(
         return false;
     }
 
-    // get joint array
-    q_ = joint_pos;
+    // calculate Jacobian inverse
+    if (!calculate_jacobian_inverse(joint_pos, link_name, jacobian_inverse_))
+    {
+        return false;
+    }
 
-    // calculate Jacobian
-    const auto ee_frame_id = model_.getFrameId(link_name);
-    pinocchio::computeFrameJacobian(model_, *data_, q_, ee_frame_id, jacobian_);
-    // damped inverse
-    Eigen::Matrix<double, Eigen::Dynamic, 6> J_inverse =
-        (jacobian_.transpose() * jacobian_ + alpha * I).inverse() * jacobian_.transpose();
-    delta_theta = J_inverse * delta_x;
+    delta_theta = jacobian_inverse_ * delta_x;
 
     return true;
 }
@@ -151,6 +149,32 @@ bool KinematicsInterfacePinocchio::calculate_jacobian(
     const auto ee_frame_id = model_.getFrameId(link_name);
     pinocchio::computeFrameJacobian(model_, *data_, q_, ee_frame_id, jacobian_);
     jacobian = jacobian_;
+
+    return true;
+}
+
+bool KinematicsInterfacePinocchio::calculate_jacobian_inverse(
+    const Eigen::Matrix<double, Eigen::Dynamic, 1>& joint_pos, const std::string& link_name,
+    Eigen::Matrix<double, Eigen::Dynamic, 6>& jacobian_inverse
+)
+{
+    // verify inputs
+    if (!verify_initialized() || !verify_joint_vector(joint_pos) || !verify_link_name(link_name) ||
+        !verify_jacobian_inverse(jacobian_inverse))
+    {
+        return false;
+    }
+
+    // get joint array
+    q_ = joint_pos;
+
+    // calculate Jacobian
+    const auto ee_frame_id = model_.getFrameId(link_name);
+    pinocchio::computeFrameJacobian(model_, *data_, q_, ee_frame_id, jacobian_);
+    // damped inverse
+    jacobian_inverse_ = (jacobian_.transpose() * jacobian_ + alpha * I).inverse() * jacobian_.transpose();
+
+    jacobian_inverse = jacobian_inverse_;
 
     return true;
 }
@@ -255,6 +279,20 @@ bool KinematicsInterfacePinocchio::verify_jacobian(const Eigen::Matrix<double, 6
         return false;
     }
     return true;
+}
+
+bool KinematicsInterfacePinocchio::verify_jacobian_inverse(
+  const Eigen::Matrix<double, Eigen::Dynamic, 6> & jacobian_inverse)
+{
+  if (
+    jacobian_inverse.rows() != jacobian_.cols() || jacobian_inverse.cols() != jacobian_.rows())
+  {
+    RCLCPP_ERROR(
+      LOGGER, "The size of the jacobian (%zu, %zu) does not match the required size of (%zu, %zu)",
+      jacobian_inverse.rows(), jacobian_inverse.cols(), jacobian_.cols(), jacobian_.rows());
+    return false;
+  }
+  return true;
 }
 
 } // namespace kinematics_interface_pinocchio
