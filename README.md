@@ -6,6 +6,9 @@
 [![ROS Jazzy](https://img.shields.io/badge/ROS-Jazzy-brightgreen.svg?logo=ros)](https://docs.ros.org/en/jazzy/index.html)
 [![ROS Rolling](https://img.shields.io/badge/ROS-Rolling-brightgreen.svg?logo=ros)](https://docs.ros.org/en/rolling/index.html)
 
+> [!NOTE]
+> This package is now included as part of the official [ROS2 Control Kinematics Interface package](https://github.com/ros-controls/kinematics_interface). No further development will be done in this repo.
+
 A [Pinocchio](https://github.com/stack-of-tasks/pinocchio)-based [ROS 2 Kinematics Interface](https://github.com/ros-controls/kinematics_interface) plugin. This can serve as a drop-in replacement for the default [KDL plugin](https://github.com/ros-controls/kinematics_interface/tree/master/kinematics_interface_kdl) in ROS 2, offering a different backend for forward and inverse kinematics.
 Requires pinocchio to be installed: `apt install ros-rolling-pinocchio`.
 
